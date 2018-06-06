@@ -4,7 +4,6 @@
     Repository: https://github.com/ardabbour/tic-tac-toe.
 """
 
-
 def minimax(board, player):
     """Minimax function for playing Tic Tac Toe"""
 
@@ -14,7 +13,8 @@ def minimax(board, player):
     # End recursion if we reached the terminal state
     game_over, score = terminal_state(board, free)
     if game_over:
-        return score
+        result = {'index': None, 'score': score}
+        return result
 
     # Begin recursion. This is where things get messy.
     moves = []
@@ -22,13 +22,16 @@ def minimax(board, player):
         move = {"index": None, "score": None}
         move["index"] = i
 
+        board[i] = player
+
         if player == AI_PLAYER:
             result = minimax(board, HUMAN_PLAYER)
         else:
             result = minimax(board, AI_PLAYER)
-
         move["score"] = result["score"]
         moves.append(move)
+
+        board[i] = move["index"]
 
     if player == AI_PLAYER:
         best_score = -10000
@@ -42,7 +45,6 @@ def minimax(board, player):
             if i["score"] < best_score:
                 best_score = i["score"]
                 best_move = i
-
     return best_move
 
 
@@ -111,6 +113,9 @@ def print_board(board):
     print("{} | {} | {}".format(board[3], board[4], board[5]))
     print("---------")
     print("{} | {} | {}".format(board[6], board[7], board[8]))
+    print("=========")
+    print("=========")
+    print("=========")
 
 
 def human_turn(board, human_player):
@@ -119,11 +124,11 @@ def human_turn(board, human_player):
     valid = False
     empty = [0, 1, 2, 3, 4, 5, 6, 7, 8]
     while not valid:
-        human_choice = int(input("Where would you like to play?"))
+        human_choice = int(input("Where would you like to play?\n"))
         if board[human_choice] in empty:
             valid = True
         else:
-            print("The cell you chose is occupied.")
+            print("The cell you chose is occupied.\n")
     board[human_choice] = human_player
     print_board(board)
 
@@ -134,7 +139,7 @@ def ai_turn(board, ai_player):
     """AI plays their turn."""
 
     ai_choice = minimax(board, ai_player)
-    board[ai_choice["result"]] = ai_player
+    board[ai_choice["index"]] = ai_player
     print_board(board)
 
     return board
@@ -148,7 +153,7 @@ def main():
     global AI_PLAYER
     HUMAN_PLAYER = "a"
     while HUMAN_PLAYER.lower() not in ["x", "o"]:
-        HUMAN_PLAYER = input("Choose your symbol.")
+        HUMAN_PLAYER = input("Choose your symbol.\n")
     AI_PLAYER = "x"
     if HUMAN_PLAYER == AI_PLAYER:
         AI_PLAYER = "o"
@@ -156,20 +161,22 @@ def main():
     # Decide who starts first
     first = "a"
     while first.lower() not in ["yes", "no", "y", "n"]:
-        first = input("Would you like to start first?")
+        first = input("Would you like to start first?\n")
 
     # Begin game
-    board = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-    game_over = False
+    board = [0, 1, 2, 3, 4, 5, 6, 7, 8]
 
     if first in ["yes", "y"]:
         board = human_turn(board, HUMAN_PLAYER)
+        game_over = check_game_status(board)
+
         while not game_over:
             board = ai_turn(board, AI_PLAYER)
             board = human_turn(board, HUMAN_PLAYER)
             game_over = check_game_status(board)
     else:
         board = ai_turn(board, HUMAN_PLAYER)
+        game_over = check_game_status(board)
         while not game_over:
             board = human_turn(board, HUMAN_PLAYER)
             board = ai_turn(board, AI_PLAYER)
