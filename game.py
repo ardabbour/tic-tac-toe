@@ -99,9 +99,22 @@ def find_empty_cells(board):
 def check_game_status(board):
     """Checks if the game is over."""
 
+    cond1 = board[0] == board[1] and board[1] == board[2]
+    cond2 = board[3] == board[4] and board[4] == board[5]
+    cond3 = board[6] == board[7] and board[7] == board[8]
+    cond4 = board[0] == board[3] and board[3] == board[6]
+    cond5 = board[1] == board[4] and board[4] == board[7]
+    cond6 = board[2] == board[5] and board[5] == board[8]
+    cond7 = board[0] == board[4] and board[4] == board[8]
+    cond8 = board[2] == board[4] and board[4] == board[6]
+
+    if cond1 or cond2 or cond3 or cond4 or cond5 or cond6 or cond7 or cond8:
+        return True
+
     for i in board:
         if i in [0, 1, 2, 3, 4, 5, 6, 7, 8]:
             return False
+
     return True
 
 
@@ -113,12 +126,12 @@ def print_board(board):
     print("{} | {} | {}".format(board[3], board[4], board[5]))
     print("---------")
     print("{} | {} | {}".format(board[6], board[7], board[8]))
-    print("=========")
-    print("=========")
-    print("=========")
+    # print("=========")
+    # print("=========")
+    # print("=========")
 
 
-def human_turn(board, human_player):
+def human_turn(board):
     """Human plays their turn."""
 
     valid = False
@@ -129,17 +142,25 @@ def human_turn(board, human_player):
             valid = True
         else:
             print("The cell you chose is occupied.\n")
-    board[human_choice] = human_player
+    board[human_choice] = HUMAN_PLAYER
+
+    print("=========")
+    print("HUMAN PLAYS:")
+    print("=========")
     print_board(board)
 
     return board
 
 
-def ai_turn(board, ai_player):
+def ai_turn(board):
     """AI plays their turn."""
 
-    ai_choice = minimax(board, ai_player)
-    board[ai_choice["index"]] = ai_player
+    ai_choice = minimax(board, AI_PLAYER)
+    board[ai_choice["index"]] = AI_PLAYER
+
+    print("=========")
+    print("AI PLAYS:")
+    print("=========")
     print_board(board)
 
     return board
@@ -167,20 +188,38 @@ def main():
     board = [0, 1, 2, 3, 4, 5, 6, 7, 8]
 
     if first in ["yes", "y"]:
-        board = human_turn(board, HUMAN_PLAYER)
         game_over = check_game_status(board)
+        board = human_turn(board)
 
         while not game_over:
-            board = ai_turn(board, AI_PLAYER)
-            board = human_turn(board, HUMAN_PLAYER)
             game_over = check_game_status(board)
+            if game_over:
+                break
+            board = ai_turn(board)
+            game_over = check_game_status(board)
+            if game_over:
+                break
+            board = human_turn(board)
     else:
-        board = ai_turn(board, HUMAN_PLAYER)
         game_over = check_game_status(board)
+        board = ai_turn(board)
+
         while not game_over:
-            board = human_turn(board, HUMAN_PLAYER)
-            board = ai_turn(board, AI_PLAYER)
             game_over = check_game_status(board)
+            if game_over:
+                break
+            board = human_turn(board)
+            game_over = check_game_status(board)
+            if game_over:
+                break
+            board = ai_turn(board)
+    if won(board, AI_PLAYER):
+        print("GAME OVER. YOU LOSE.")
+
+    elif won(board, HUMAN_PLAYER):
+        print("GAME OVER. YOU WIN.")
+    else:
+        print("GAME OVER. TIE.")
 
 
 if __name__ == "__main__":
